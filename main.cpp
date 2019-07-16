@@ -1,16 +1,19 @@
 #include "ringct/bulletproofs.h"
 #include <iostream>
+#include <random>
+#include <time.h>
 
 using namespace rct;
 using namespace std;
 
 int main() {
+    srand (time(nullptr));
     key k;
     for (int i = 0; i < 32; ++i) {
-        k.bytes[i] = (unsigned char)i;
+        k.bytes[i] = (unsigned char)(rand() % 255);
     }
 
-    uint64_t v = 123456789;
+    uint64_t v = 1234567890000;
     Bulletproof bp = bulletproof_PROVE(v, k);
 
     bool result = bulletproof_VERIFY(bp);
