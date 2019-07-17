@@ -17,8 +17,6 @@ SOURCES += \
         crypto/hash.c \
         crypto/keccak.c \
         crypto/random.c \
-        device/device.cpp \
-        device/device_default.cpp \
         easylogging++/easylogging++.cc \
         epee/hex.cpp \
         epee/memwipe.c \
@@ -29,7 +27,6 @@ SOURCES += \
         ringct/multiexp.cc \
         ringct/rctCryptoOps.c \
         ringct/rctOps.cpp \
-        ringct/rctSigs.cpp \
         ringct/rctTypes.cpp
 
 HEADERS += \
@@ -50,8 +47,6 @@ HEADERS += \
     cryptonote_basic/blobdatatype.h \
     cryptonote_basic/tx_extra.h \
     cryptonote_config.h \
-    device/device.hpp \
-    device/device_default.hpp \
     easylogging++/ea_config.h \
     easylogging++/easylogging++.h \
     epee/fnv1.h \
@@ -71,7 +66,6 @@ HEADERS += \
     ringct/multiexp.h \
     ringct/rctCryptoOps.h \
     ringct/rctOps.h \
-    ringct/rctSigs.h \
     ringct/rctTypes.h \
     serialization/binary_archive.h \
     serialization/container.h \
