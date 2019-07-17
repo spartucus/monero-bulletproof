@@ -46,7 +46,6 @@ extern "C" {
 #include "crypto/generic-ops.h"
 #include "crypto/crypto.h"
 
-#include "hex.h"
 #include "span.h"
 #include "serialization/vector.h"
 #include "serialization/debug_archive.h"
@@ -571,13 +570,6 @@ namespace cryptonote {
     static inline bool operator==(const crypto::secret_key &k0, const rct::key &k1) { return !crypto_verify_32((const unsigned char*)&k0, k1.bytes); }
     static inline bool operator!=(const crypto::secret_key &k0, const rct::key &k1) { return crypto_verify_32((const unsigned char*)&k0, k1.bytes); }
 }
-
-namespace rct {
-inline std::ostream &operator <<(std::ostream &o, const rct::key &v) {
-  epee::to_hex::formatted(o, epee::as_byte_span(v)); return o;
-}
-}
-
 
 namespace std
 {

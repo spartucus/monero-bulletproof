@@ -3,8 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += --coverage
-QMAKE_LFLAGS += --coverage
+#QMAKE_CXXFLAGS += --coverage
+#QMAKE_LFLAGS += --coverage
 
 SOURCES += \
         common/aligned.c \
@@ -18,10 +18,8 @@ SOURCES += \
         crypto/keccak.c \
         crypto/random.c \
         easylogging++/easylogging++.cc \
-        epee/hex.cpp \
         epee/memwipe.c \
         epee/mlocker.cpp \
-        epee/wipeable_string.cpp \
         main.cpp \
         ringct/bulletproofs.cc \
         ringct/multiexp.cc \
@@ -49,7 +47,6 @@ HEADERS += \
     easylogging++/ea_config.h \
     easylogging++/easylogging++.h \
     epee/fnv1.h \
-    epee/hex.h \
     epee/int-util.h \
     epee/memwipe.h \
     epee/misc_log_ex.h \
@@ -60,7 +57,6 @@ HEADERS += \
     epee/string_tools.h \
     epee/syncobj.h \
     epee/warnings.h \
-    epee/wipeable_string.h \
     ringct/bulletproofs.h \
     ringct/multiexp.h \
     ringct/rctCryptoOps.h \
