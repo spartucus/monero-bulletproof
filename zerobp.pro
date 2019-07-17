@@ -3,10 +3,12 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_CXXFLAGS += --coverage
+QMAKE_LFLAGS += --coverage
+
 SOURCES += \
         common/aligned.c \
         common/perf_timer.cpp \
-        common/threadpool.cpp \
         crypto/chacha.c \
         crypto/crypto-ops-data.c \
         crypto/crypto-ops.c \
@@ -34,7 +36,6 @@ HEADERS += \
     common/aligned.h \
     common/perf_timer.h \
     common/pod-class.h \
-    common/threadpool.h \
     common/varint.h \
     crypto/chacha.h \
     crypto/crypto-ops.h \
