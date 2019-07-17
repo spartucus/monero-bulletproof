@@ -9,7 +9,7 @@ using namespace std;
 int main() {
     srand (time(nullptr));
     key k;
-    for (int i = 0; i < 32; ++i) {
+    for (int i = 0; i < 31; ++i) {
         k.bytes[i] = (unsigned char)(rand() % 255);
     }
 
