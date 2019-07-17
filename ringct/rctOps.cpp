@@ -220,36 +220,6 @@ static const zero_commitment zero_commitments[] = {
 
 namespace rct {
 
-    //Various key initialization functions
-
-    //initializes a key matrix;
-    //first parameter is rows,
-    //second is columns
-    keyM keyMInit(size_t rows, size_t cols) {
-        keyM rv(cols);
-        size_t i = 0;
-        for (i = 0 ; i < cols ; i++) {
-            rv[i] = keyV(rows);
-        }
-        return rv;
-    }
-
-
-
-
-    //Various key generation functions
-
-    bool toPointCheckOrder(ge_p3 *P, const unsigned char *data)
-    {
-        if (ge_frombytes_vartime(P, data))
-            return false;
-        ge_p2 R;
-        ge_scalarmult(&R, curveOrder().bytes, P);
-        key tmp;
-        ge_tobytes(tmp.bytes, &R);
-        return tmp == identity();
-    }
-
     //generates a random scalar which can be used as a secret key or mask
     void skGen(key &sk) {
         random32_unbiased(sk.bytes);
@@ -272,77 +242,6 @@ namespace rct {
             skGen(rv[i]);
         }
         return rv;
-    }
-
-    //generates a random curve point (for testing)
-    key  pkGen() {
-        key sk = skGen();
-        key pk = scalarmultBase(sk);
-        return pk;
-    }
-
-    //generates a random secret and corresponding public key
-    void skpkGen(key &sk, key &pk) {
-        skGen(sk);
-        scalarmultBase(pk, sk);
-    }
-
-    //generates a random secret and corresponding public key
-    tuple<key, key>  skpkGen() {
-        key sk = skGen();
-        key pk = scalarmultBase(sk);
-        return make_tuple(sk, pk);
-    }
-
-    //generates C =aG + bH from b, a is given..
-    void genC(key & C, const key & a, xmr_amount amount) {
-        addKeys2(C, a, d2h(amount), rct::H);
-    }
-
-    //generates a <secret , public> / Pedersen commitment to the amount
-    tuple<ctkey, ctkey> ctskpkGen(xmr_amount amount) {
-        ctkey sk, pk;
-        skpkGen(sk.dest, pk.dest);
-        skpkGen(sk.mask, pk.mask);
-        key am = d2h(amount);
-        key bH = scalarmultH(am);
-        addKeys(pk.mask, pk.mask, bH);
-        return make_tuple(sk, pk);
-    }
-    
-    
-    //generates a <secret , public> / Pedersen commitment but takes bH as input 
-    tuple<ctkey, ctkey> ctskpkGen(const key &bH) {
-        ctkey sk, pk;
-        skpkGen(sk.dest, pk.dest);
-        skpkGen(sk.mask, pk.mask);
-        addKeys(pk.mask, pk.mask, bH);
-        return make_tuple(sk, pk);
-    }
-    
-    key zeroCommit(xmr_amount amount) {
-        const zero_commitment *begin = zero_commitments;
-        const zero_commitment *end = zero_commitments + sizeof(zero_commitments) / sizeof(zero_commitments[0]);
-        const zero_commitment value{amount, rct::zero()};
-        const auto it = std::lower_bound(begin, end, value, [](const zero_commitment &e0, const zero_commitment &e1){ return e0.amount < e1.amount; });
-        if (it != end && it->amount == amount)
-        {
-            return it->commitment;
-        }
-        key am = d2h(amount);
-        key bH = scalarmultH(am);
-        return addKeys(G, bH);
-    }
-
-    key commit(xmr_amount amount, const key &mask) {
-        key c;
-        genC(c, mask, amount);
-        return c;
-    }
-
-    //generates a random uint long long (for testing)
-    xmr_amount randXmrAmount(xmr_amount upperlimit) {
-        return h2d(skGen()) % (upperlimit);
     }
 
     //Scalar multiplications of curve points
@@ -407,12 +306,6 @@ namespace rct {
         rct::key res;
         ge_tobytes(res.bytes, &p2);
         return res;
-    }
-
-    //Computes lA where l is the curve order
-    bool isInMainSubgroup(const key & A) {
-        ge_p3 p3;
-        return toPointCheckOrder(&p3, A.bytes);
     }
 
     //Curve addition / subtractions

@@ -26,8 +26,7 @@ SOURCES += \
         ringct/bulletproofs.cc \
         ringct/multiexp.cc \
         ringct/rctCryptoOps.c \
-        ringct/rctOps.cpp \
-        ringct/rctTypes.cpp
+        ringct/rctOps.cpp
 
 HEADERS += \
     common/aligned.h \
