@@ -247,14 +247,6 @@ namespace rct {
     //Scalar multiplications of curve points
 
     //does a * G where a is a scalar and G is the curve basepoint
-    void scalarmultBase(key &aG,const key &a) {
-        ge_p3 point;
-        sc_reduce32copy(aG.bytes, a.bytes); //do this beforehand!
-        ge_scalarmult_base(&point, aG.bytes);
-        ge_p3_tobytes(aG.bytes, &point);
-    }
-
-    //does a * G where a is a scalar and G is the curve basepoint
     key scalarmultBase(const key & a) {
         ge_p3 point;
         key aG;
@@ -265,30 +257,11 @@ namespace rct {
     }
 
     //does a * P where a is a scalar and P is an arbitrary point
-    void scalarmultKey(key & aP, const key &P, const key &a) {
-        ge_p3 A;
-        ge_p2 R;
-        CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&A, P.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-        ge_scalarmult(&R, a.bytes, &A);
-        ge_tobytes(aP.bytes, &R);
-    }
-
-    //does a * P where a is a scalar and P is an arbitrary point
     key scalarmultKey(const key & P, const key & a) {
         ge_p3 A;
         ge_p2 R;
         CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&A, P.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
         ge_scalarmult(&R, a.bytes, &A);
-        key aP;
-        ge_tobytes(aP.bytes, &R);
-        return aP;
-    }
-
-
-    //Computes aH where H= toPoint(cn_fast_hash(G)), G the basepoint
-    key scalarmultH(const key & a) {
-        ge_p2 R;
-        ge_scalarmult(&R, a.bytes, &ge_p3_H);
         key aP;
         ge_tobytes(aP.bytes, &R);
         return aP;
@@ -323,38 +296,6 @@ namespace rct {
         ge_p3_tobytes(AB.bytes, &A2);
     }
 
-    rct::key addKeys(const key &A, const key &B) {
-      key k;
-      addKeys(k, A, B);
-      return k;
-    }
-
-    rct::key addKeys(const keyV &A) {
-      if (A.empty())
-        return rct::identity();
-      ge_p3 p3, tmp;
-      CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&p3, A[0].bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-      for (size_t i = 1; i < A.size(); ++i)
-      {
-        CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&tmp, A[i].bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-        ge_cached p2;
-        ge_p3_to_cached(&p2, &tmp);
-        ge_p1p1 p1;
-        ge_add(&p1, &p3, &p2);
-        ge_p1p1_to_p3(&p3, &p1);
-      }
-      rct::key res;
-      ge_p3_tobytes(res.bytes, &p3);
-      return res;
-    }
-
-    //addKeys1
-    //aGB = aG + B where a is a scalar, G is the basepoint, and B is a point
-    void addKeys1(key &aGB, const key &a, const key & B) {
-        key aG = scalarmultBase(a);
-        addKeys(aGB, aG, B);
-    }
-
     //addKeys2
     //aGbB = aG + bB where a, b are scalars, G is the basepoint and B is a point
     void addKeys2(key &aGbB, const key &a, const key &b, const key & B) {
@@ -363,61 +304,6 @@ namespace rct {
         CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&B2, B.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
         ge_double_scalarmult_base_vartime(&rv, b.bytes, &B2, a.bytes);
         ge_tobytes(aGbB.bytes, &rv);
-    }
-
-    //Does some precomputation to make addKeys3 more efficient
-    // input B a curve point and output a ge_dsmp which has precomputation applied
-    void precomp(ge_dsmp rv, const key & B) {
-        ge_p3 B2;
-        CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&B2, B.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-        ge_dsm_precomp(rv, &B2);
-    }
-
-    //addKeys3
-    //aAbB = a*A + b*B where a, b are scalars, A, B are curve points
-    //B must be input after applying "precomp"
-    void addKeys3(key &aAbB, const key &a, const key &A, const key &b, const ge_dsmp B) {
-        ge_p2 rv;
-        ge_p3 A2;
-        CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&A2, A.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-        ge_double_scalarmult_precomp_vartime(&rv, a.bytes, &A2, b.bytes, B);
-        ge_tobytes(aAbB.bytes, &rv);
-    }
-
-    //addKeys3
-    //aAbB = a*A + b*B where a, b are scalars, A, B are curve points
-    //A and B must be input after applying "precomp"
-    void addKeys3(key &aAbB, const key &a, const ge_dsmp A, const key &b, const ge_dsmp B) {
-        ge_p2 rv;
-        ge_double_scalarmult_precomp_vartime2(&rv, a.bytes, A, b.bytes, B);
-        ge_tobytes(aAbB.bytes, &rv);
-    }
-
-
-    //subtract Keys (subtracts curve points)
-    //AB = A - B where A, B are curve points
-    void subKeys(key & AB, const key &A, const key &B) {
-        ge_p3 B2, A2;
-        CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&B2, B.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-        CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&A2, A.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-        ge_cached tmp2;
-        ge_p3_to_cached(&tmp2, &B2);
-        ge_p1p1 tmp3;
-        ge_sub(&tmp3, &A2, &tmp2);
-        ge_p1p1_to_p3(&A2, &tmp3);
-        ge_p3_tobytes(AB.bytes, &A2);
-    }
-
-    //checks if A, B are equal in terms of bytes (may say no if one is a non-reduced scalar)
-    //without doing curve operations
-    bool equalKeys(const key & a, const key & b) {
-        bool rv = true;
-        for (int i = 0; i < 32; ++i) {
-          if (a.bytes[i] != b.bytes[i]) {
-            rv = false;
-          }
-        }
-        return rv;
     }
 
     //Hashing - cn_fast_hash
@@ -433,16 +319,6 @@ namespace rct {
     }
 
     //cn_fast_hash for a 32 byte key
-    void cn_fast_hash(key & hash, const key & in) {
-        keccak((const uint8_t *)in.bytes, 32, hash.bytes, 32);
-    }
-    
-    void hash_to_scalar(key & hash, const key & in) {
-        cn_fast_hash(hash, in);
-        sc_reduce32(hash.bytes);
-    }
-
-    //cn_fast_hash for a 32 byte key
     key cn_fast_hash(const key & in) {
         key hash;
         keccak((const uint8_t *)in.bytes, 32, hash.bytes, 32);
@@ -454,35 +330,6 @@ namespace rct {
         sc_reduce32(hash.bytes);
         return hash;
      }
-    
-    //cn_fast_hash for a 128 byte unsigned char
-    key cn_fast_hash128(const void * in) {
-        key hash;
-        keccak((const uint8_t *)in, 128, hash.bytes, 32);
-        return hash;
-    }
-    
-    key hash_to_scalar128(const void * in) {
-        key hash = cn_fast_hash128(in);
-        sc_reduce32(hash.bytes);
-        return hash;
-    }
-    
-    //cn_fast_hash for multisig purpose
-    //This takes the outputs and commitments
-    //and hashes them into a 32 byte sized key
-    key cn_fast_hash(const ctkeyV &PC) {
-        if (PC.empty()) return rct::hash2rct(crypto::cn_fast_hash("", 0));
-        key rv;
-        cn_fast_hash(rv, &PC[0], 64*PC.size());
-        return rv;
-    }
-    
-    key hash_to_scalar(const ctkeyV &PC) {
-        key rv = cn_fast_hash(PC);
-        sc_reduce32(rv.bytes);
-        return rv;
-    }
     
    //cn_fast_hash for a key-vector of arbitrary length
    //this is useful since you take a number of keys
@@ -500,34 +347,7 @@ namespace rct {
        key rv = cn_fast_hash(keys);
        sc_reduce32(rv.bytes);
        return rv;
-   }
-
-   key cn_fast_hash(const key64 keys) {
-      key rv;
-      cn_fast_hash(rv, &keys[0], 64 * sizeof(keys[0]));
-      //dp(rv);
-      return rv;
-   }
-
-   key hash_to_scalar(const key64 keys) {
-       key rv = cn_fast_hash(keys);
-       sc_reduce32(rv.bytes);
-       return rv;
-   }
-
-    key hashToPointSimple(const key & hh) {
-        key pointk;
-        ge_p1p1 point2;
-        ge_p2 point;
-        ge_p3 res;
-        key h = cn_fast_hash(hh); 
-        CHECK_AND_ASSERT_THROW_MES_L1(ge_frombytes_vartime(&res, h.bytes) == 0, "ge_frombytes_vartime failed at "+boost::lexical_cast<std::string>(__LINE__));
-        ge_p3_to_p2(&point, &res);
-        ge_mul8(&point2, &point);
-        ge_p1p1_to_p3(&res, &point2);
-        ge_p3_tobytes(pointk.bytes, &res);
-        return pointk;
-    }    
+   }  
     
     key hashToPoint(const key & hh) {
         key pointk;
@@ -540,82 +360,5 @@ namespace rct {
         ge_p1p1_to_p3(&res, &point2);        
         ge_p3_tobytes(pointk.bytes, &res);
         return pointk;
-    }
-
-    void hashToPoint(key & pointk, const key & hh) {
-        ge_p2 point;
-        ge_p1p1 point2;
-        ge_p3 res;
-        key h = cn_fast_hash(hh); 
-        ge_fromfe_frombytes_vartime(&point, h.bytes);
-        ge_mul8(&point2, &point);
-        ge_p1p1_to_p3(&res, &point2);        
-        ge_p3_tobytes(pointk.bytes, &res);
-    }    
-
-    //sums a vector of curve points (for scalars use sc_add)
-    void sumKeys(key & Csum, const keyV &  Cis) {
-        identity(Csum);
-        size_t i = 0;
-        for (i = 0; i < Cis.size(); i++) {
-            addKeys(Csum, Csum, Cis[i]);
-        }
-    }
-
-    //Elliptic Curve Diffie Helman: encodes and decodes the amount b and mask a
-    // where C= aG + bH
-    static key ecdhHash(const key &k)
-    {
-        char data[38];
-        rct::key hash;
-        memcpy(data, "amount", 6);
-        memcpy(data + 6, &k, sizeof(k));
-        cn_fast_hash(hash, data, sizeof(data));
-        return hash;
-    }
-    static void xor8(key &v, const key &k)
-    {
-        for (int i = 0; i < 8; ++i)
-            v.bytes[i] ^= k.bytes[i];
-    }
-    key genCommitmentMask(const key &sk)
-    {
-        char data[15 + sizeof(key)];
-        memcpy(data, "commitment_mask", 15);
-        memcpy(data + 15, &sk, sizeof(sk));
-        key scalar;
-        hash_to_scalar(scalar, data, sizeof(data));
-        return scalar;
-    }
-
-    void ecdhEncode(ecdhTuple & unmasked, const key & sharedSec, bool v2) {
-        //encode
-        if (v2)
-        {
-          unmasked.mask = zero();
-          xor8(unmasked.amount, ecdhHash(sharedSec));
-        }
-        else
-        {
-          key sharedSec1 = hash_to_scalar(sharedSec);
-          key sharedSec2 = hash_to_scalar(sharedSec1);
-          sc_add(unmasked.mask.bytes, unmasked.mask.bytes, sharedSec1.bytes);
-          sc_add(unmasked.amount.bytes, unmasked.amount.bytes, sharedSec2.bytes);
-        }
-    }
-    void ecdhDecode(ecdhTuple & masked, const key & sharedSec, bool v2) {
-        //decode
-        if (v2)
-        {
-          masked.mask = genCommitmentMask(sharedSec);
-          xor8(masked.amount, ecdhHash(sharedSec));
-        }
-        else
-        {
-          key sharedSec1 = hash_to_scalar(sharedSec);
-          key sharedSec2 = hash_to_scalar(sharedSec1);
-          sc_sub(masked.mask.bytes, masked.mask.bytes, sharedSec1.bytes);
-          sc_sub(masked.amount.bytes, masked.amount.bytes, sharedSec2.bytes);
-        }
     }
 }

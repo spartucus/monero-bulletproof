@@ -92,8 +92,6 @@ namespace rct {
     key scalarmultBase(const key & a);
     //does a * P where a is a scalar and P is an arbitrary point
     key scalarmultKey(const key &P, const key &a);
-    //Computes aH where H= toPoint(cn_fast_hash(G)), G the basepoint
-    key scalarmultH(const key & a);
     // multiplies a point by 8
     key scalarmult8(const key & P);
 
@@ -101,23 +99,8 @@ namespace rct {
 
     //for curve points: AB = A + B
     void addKeys(key &AB, const key &A, const key &B);
-    rct::key addKeys(const key &A, const key &B);
-    rct::key addKeys(const keyV &A);
-    //aGB = aG + B where a is a scalar, G is the basepoint, and B is a point
-    void addKeys1(key &aGB, const key &a, const key & B);
     //aGbB = aG + bB where a, b are scalars, G is the basepoint and B is a point
     void addKeys2(key &aGbB, const key &a, const key &b, const key &B);
-    //Does some precomputation to make addKeys3 more efficient
-    // input B a curve point and output a ge_dsmp which has precomputation applied
-    void precomp(ge_dsmp rv, const key &B);
-    //aAbB = a*A + b*B where a, b are scalars, A, B are curve points
-    //B must be input after applying "precomp"
-    void addKeys3(key &aAbB, const key &a, const key &A, const key &b, const ge_dsmp B);
-    void addKeys3(key &aAbB, const key &a, const ge_dsmp A, const key &b, const ge_dsmp B);
-    //AB = A - B where A, B are curve points
-    void subKeys(key &AB, const key &A, const  key &B);
-    //checks if A, B are equal as curve points
-    bool equalKeys(const key & A, const key & B);
 
     //Hashing - cn_fast_hash
     //be careful these are also in crypto namespace
@@ -125,35 +108,12 @@ namespace rct {
     void cn_fast_hash(key &hash, const void * data, const size_t l);
     void hash_to_scalar(key &hash, const void * data, const size_t l);
     //cn_fast_hash for a 32 byte key
-    void cn_fast_hash(key &hash, const key &in);
-    void hash_to_scalar(key &hash, const key &in);
-    //cn_fast_hash for a 32 byte key
     key cn_fast_hash(const key &in);
     key hash_to_scalar(const key &in);
-    //for mg sigs
-    key cn_fast_hash128(const void * in);
-    key hash_to_scalar128(const void * in);
-    key cn_fast_hash(const ctkeyV &PC);
-    key hash_to_scalar(const ctkeyV &PC);
     //for mg sigs 
     key cn_fast_hash(const keyV &keys);
     key hash_to_scalar(const keyV &keys);
-    //for ANSL
-    key cn_fast_hash(const key64 keys);
-    key hash_to_scalar(const key64 keys);
 
-    //returns hashToPoint as described in https://github.com/ShenNoether/ge_fromfe_writeup 
-    key hashToPointSimple(const key &in);
-    key hashToPoint(const key &in);
-    void hashToPoint(key &out, const key &in);
-
-    //sums a vector of curve points (for scalars use sc_add)
-    void sumKeys(key & Csum, const key &Cis);
-
-    //Elliptic Curve Diffie Helman: encodes and decodes the amount b and mask a
-    // where C= aG + bH
-    key genCommitmentMask(const key &sk);
-    void ecdhEncode(ecdhTuple & unmasked, const key & sharedSec, bool v2);
-    void ecdhDecode(ecdhTuple & masked, const key & sharedSec, bool v2);
+    key hashToPoint(const key & hh);
 }
 #endif  /* RCTOPS_H */
