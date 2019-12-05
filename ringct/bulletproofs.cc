@@ -34,7 +34,7 @@
 #include "misc_log_ex.h"
 #include "span.h"
 #include "common/perf_timer.h"
-#include "cryptonote_config.h"
+//#include "cryptonote_config.h"
 extern "C"
 {
 #include "crypto/crypto-ops.h"
@@ -68,7 +68,7 @@ static rct::keyV vector_dup(const rct::key &x, size_t n);
 static rct::key inner_product(const rct::keyV &a, const rct::keyV &b);
 
 static constexpr size_t maxN = 64;
-static constexpr size_t maxM = BULLETPROOF_MAX_OUTPUTS;
+static constexpr size_t maxM = 16;
 static rct::key Hi[maxN*maxM], Gi[maxN*maxM];
 static ge_p3 Hi_p3[maxN*maxM], Gi_p3[maxN*maxM];
 static std::shared_ptr<straus_cached_data> straus_HiGi_cache;

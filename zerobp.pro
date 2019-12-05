@@ -41,7 +41,6 @@ HEADERS += \
     crypto/initializer.h \
     crypto/keccak.h \
     crypto/random.h \
-    cryptonote_config.h \
     easylogging++/ea_config.h \
     easylogging++/easylogging++.h \
     epee/fnv1.h \
