@@ -3,8 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-#QMAKE_CXXFLAGS += --coverage
-#QMAKE_LFLAGS += --coverage
+QMAKE_CXXFLAGS += --coverage
+QMAKE_LFLAGS += --coverage
 
 SOURCES += \
         common/aligned.c \
@@ -41,8 +41,6 @@ HEADERS += \
     crypto/initializer.h \
     crypto/keccak.h \
     crypto/random.h \
-    cryptonote_basic/blobdatatype.h \
-    cryptonote_basic/tx_extra.h \
     cryptonote_config.h \
     easylogging++/ea_config.h \
     easylogging++/easylogging++.h \
